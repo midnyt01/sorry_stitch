@@ -1,0 +1,459 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg1: #0a1420;
+  --bg2: #14283d;
+  --panel: rgba(10, 22, 38, 0.82);
+  --accent: #4a9be8;
+  --gold: #ffd54a;
+  --pink: #f27bb8;
+  --text: #eaf4ff;
+  --muted: #9fb4cc;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: radial-gradient(120% 120% at 50% 0%, var(--bg2) 0%, var(--bg1) 60%);
+  color: var(--text);
+  font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+/* retro display font (bundled via @fontsource/press-start-2p) */
+.font-pix,
+.title-card h1,
+.card h2,
+.hud-label,
+.hud-value,
+.title-badge {
+  font-family: "Press Start 2P", "Trebuchet MS", monospace;
+}
+
+.stage {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+}
+
+/* The game frame keeps the 800x480 aspect ratio and fills the screen. */
+.frame {
+  position: relative;
+  width: min(96vw, calc((100vh - 24px) * (8 / 5)));
+  max-width: 1100px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(74, 155, 232, 0.25);
+  background: #000;
+}
+
+/* Phaser renders into .phaser-host; scale the 800x480 buffer to the frame */
+.phaser-host {
+  position: absolute;
+  inset: 0;
+}
+.phaser-host canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* ---- HUD ---- */
+.hud {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  pointer-events: none;
+  font-weight: 700;
+}
+
+.hud-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--panel);
+  padding: 5px 10px;
+  border-radius: 8px;
+  min-width: 58px;
+  backdrop-filter: blur(4px);
+}
+
+.hud-label {
+  font-size: 7px;
+  color: var(--muted);
+}
+
+.hud-value {
+  font-size: 11px;
+  color: #fff;
+}
+
+.hud-value.low {
+  color: #ff5a5a;
+}
+
+.hud-ico {
+  color: var(--pink);
+}
+.hud-ico.dim {
+  color: var(--muted);
+}
+.hud-ico.love {
+  color: var(--pink);
+  filter: drop-shadow(0 0 3px rgba(242, 123, 184, 0.6));
+}
+
+/* romance meter — a small heart bar that fills as she collects love */
+.love-meter {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  min-width: 92px;
+}
+.love-bar {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+.love-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f27bb8, #ff9ec7);
+  box-shadow: 0 0 6px rgba(242, 123, 184, 0.7);
+}
+
+.icon-btn {
+  margin-left: auto;
+  pointer-events: auto;
+  background: var(--panel);
+  border: none;
+  color: #fff;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+/* ---- Overlays ---- */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(4, 10, 20, 0.68);
+  backdrop-filter: blur(3px);
+  z-index: 20;
+}
+
+.card,
+.title-card {
+  background: linear-gradient(180deg, rgba(20, 40, 61, 0.96), rgba(10, 22, 38, 0.96));
+  border: 1px solid rgba(74, 155, 232, 0.35);
+  border-radius: 16px;
+  padding: 28px 34px;
+  text-align: center;
+  max-width: 440px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+.card h2 {
+  font-size: 13px;
+  line-height: 1.7;
+  letter-spacing: 0;
+  margin-bottom: 10px;
+}
+
+.big-ico {
+  color: var(--accent);
+  margin-bottom: 10px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+}
+.big-ico.gold {
+  color: var(--gold);
+}
+
+.card p,
+.title-card .sub {
+  color: var(--muted);
+  margin: 8px 0 18px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.ohana {
+  color: var(--gold) !important;
+  font-style: italic;
+  font-size: 15px !important;
+}
+
+/* ---- the apology / win screen: a love letter, not a game screen ---- */
+.win-overlay {
+  background: rgba(30, 12, 26, 0.6);
+}
+.love-card {
+  background: linear-gradient(180deg, rgba(58, 24, 46, 0.96), rgba(30, 16, 32, 0.97));
+  border: 1px solid rgba(242, 123, 184, 0.5);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55), 0 0 40px rgba(242, 123, 184, 0.25);
+  padding: 30px 36px;
+  max-width: 480px;
+}
+.love-heart {
+  display: grid;
+  place-items: center;
+  color: var(--pink);
+  margin-bottom: 8px;
+  filter: drop-shadow(0 0 10px rgba(242, 123, 184, 0.7));
+  animation: loveBeat 1.4s ease-in-out infinite;
+}
+@keyframes loveBeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.14); }
+}
+.love-card h2.win {
+  color: #ffd0e6;
+  font-size: 12px;
+  text-transform: lowercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+.love-msg {
+  color: #f6d7e6;
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 0 0 18px;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-weight: 400;
+}
+.love-card .stats {
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+
+.title-badge {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--pink);
+  border: 1px solid rgba(242, 123, 184, 0.5);
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 14px;
+}
+
+.title-card h1 {
+  font-size: 26px;
+  letter-spacing: 0;
+  line-height: 1.2;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+}
+
+.title-card h1 span {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin-top: 8px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.controls-legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 16px;
+  font-size: 12px;
+  color: var(--muted);
+  margin: 6px 0 20px;
+}
+
+.controls-legend b {
+  color: #fff;
+  font-family: monospace;
+}
+
+.btn {
+  background: rgba(74, 155, 232, 0.15);
+  border: 1px solid rgba(74, 155, 232, 0.5);
+  color: #fff;
+  padding: 11px 22px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.06s ease-out, background 0.15s ease;
+  letter-spacing: 0.5px;
+  will-change: transform;
+}
+
+.btn:hover {
+  background: rgba(74, 155, 232, 0.3);
+  transform: translateY(-1px);
+}
+
+/* instant press feedback — GPU-composited scale, reads as a physical button */
+.btn:active {
+  transform: translateY(1px) scale(0.96);
+  transition-duration: 0.02s;
+}
+
+.btn.primary {
+  background: linear-gradient(180deg, #5eb0f5, #2e6fb0);
+  border-color: transparent;
+  box-shadow: 0 6px 18px rgba(74, 155, 232, 0.4);
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.stats {
+  display: flex;
+  gap: 22px;
+  justify-content: center;
+  margin-bottom: 18px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.stats b {
+  color: #fff;
+}
+
+.win {
+  color: var(--gold);
+}
+
+/* ---- Touch controls ---- */
+.touch {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 0 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  z-index: 15;
+  pointer-events: none;
+}
+
+.tbtn {
+  pointer-events: auto;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: rgba(10, 22, 38, 0.55);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-size: 24px;
+  display: grid;
+  place-items: center;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  transition: transform 0.06s ease-out, background 0.12s ease;
+}
+
+.tbtn:active {
+  transform: scale(0.92);
+  background: rgba(74, 155, 232, 0.5);
+}
+
+.icon-btn {
+  transition: transform 0.06s ease-out;
+}
+.icon-btn:active {
+  transform: scale(0.92);
+}
+
+.tdir {
+  width: 58px;
+  height: 58px;
+}
+
+.tjump {
+  width: 76px;
+  height: 76px;
+  background: rgba(74, 155, 232, 0.45);
+  border-color: rgba(74, 155, 232, 0.7);
+}
+
+.taction {
+  background: rgba(90, 224, 192, 0.4);
+  border-color: rgba(90, 224, 192, 0.7);
+}
+
+.touch-left,
+.touch-right {
+  display: flex;
+  gap: 12px;
+}
+
+.touch-left {
+  position: absolute;
+  left: 14px;
+  bottom: 16px;
+}
+
+.touch-right {
+  position: absolute;
+  right: 14px;
+  bottom: 16px;
+}
+
+/* ---- Landscape prompt ---- */
+.landscape-prompt {
+  z-index: 50;
+  background: rgba(4, 10, 20, 0.92);
+}
+
+.landscape-prompt .card {
+  border-color: rgba(255, 213, 74, 0.5);
+}
+
+@media (max-height: 400px) {
+  .card,
+  .title-card {
+    padding: 16px 20px;
+  }
+}
+
+/* Accessibility: honor reduced-motion — keep instant press feedback (a11y
+   signal), drop the decorative card/overlay travel and scale animations. */
+@media (prefers-reduced-motion: reduce) {
+  .btn:active,
+  .tbtn:active,
+  .icon-btn:active {
+    transform: none;
+  }
+  .btn,
+  .tbtn,
+  .icon-btn {
+    transition: background 0.12s ease;
+  }
+}
